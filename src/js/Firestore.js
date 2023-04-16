@@ -1,0 +1,262 @@
+import { initializeApp } from "firebase/app";
+import { getFirestore } from "firebase/firestore";
+import {
+  updateDoc,
+  collection,
+  getDocs,
+  doc,
+  addDoc,
+  getDoc,
+  query,
+  where,
+} from "firebase/firestore";
+import firebase from "firebase/compat/app";
+import "firebase/firestore";
+import {
+  GoogleAuthProvider,
+  getAuth,
+  signInWithPopup,
+  signOut,
+} from "firebase/auth";
+
+export default class Firestore {
+  constructor() {
+    // Initialize Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyAA7EhvqsU84_G03JK4Z_98M_z0cxsua8c",
+      authDomain: "ecommerce-ed019.firebaseapp.com",
+      databaseURL:
+        "https://ecommerce-ed019-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "ecommerce-ed019",
+      storageBucket: "ecommerce-ed019.appspot.com",
+      messagingSenderId: "366894312098",
+      appId: "1:366894312098:web:1a7616c26abdb324c1c5fb",
+      measurementId: "G-KC7EV6D3TM",
+    };
+
+    const app = initializeApp(firebaseConfig);
+    this.db = getFirestore();
+    this.auth = getAuth(app);
+    this.googleProvider = new GoogleAuthProvider();
+  }
+
+  async uploadmessage(data) {
+    const contactRef = collection(this.db, "contact");
+
+    return await addDoc(contactRef, data)
+      .then((res) => {
+        return true;
+      })
+      .catch((e) => {
+        console.log(e);
+        return false;
+      });
+  }
+
+  getDb() {
+    return this.db;
+  }
+
+  async logout() {
+    await signOut(this.auth);
+  }
+
+  getuser() {
+    return this.auth;
+  }
+
+  async getProductByUser(user) {
+    let cant = [];
+    let total = 0;
+    if (user) {
+      await this.readDocuments("cos", ["user_id", "==", user.uid]).then(
+        (res) => {
+          for (let i = 0; i < res.length; i++) {
+            cant.push({ id: res[i].id_produs, cant: res[i].cantitate });
+          }
+        }
+      );
+
+      for (let i = 0; i < cant.length; i++) {
+        cant[i] = {
+          cant: cant[i].cant,
+          ...(await this.getProductById(cant[i].id)),
+        };
+        total += cant[i].cant * cant[i].pret;
+      }
+      // cant.forEach(async prod => {
+      // })
+      console.log("2) ", cant);
+    }
+    return { cant, total };
+  }
+
+  async addit(id, user) {
+    if (user)
+      await this.updateProductCos({
+        id_produs: id,
+        cantitate: 1,
+        user_id: user.uid,
+      }).then((res) => {
+        console.log(res);
+        if (res === "adaug") alert("Adaugat cu succes in cos!");
+        else if (res === "update ok") alert("Update cantitate");
+        else alert("eroare");
+      });
+    else {
+      alert("nu e logat");
+    }
+  }
+
+  async getCos(user) {
+    let cant = 0;
+    if (user) {
+      await this.readDocuments("cos", ["user_id", "==", user.uid]).then(
+        (res) => {
+          for (let i = 0; i < res.length; i++) {
+            cant += res[i].cantitate;
+          }
+        }
+      );
+    }
+    return cant;
+  }
+
+  async signInWithGoogle() {
+    try {
+      const res = await signInWithPopup(this.auth, this.googleProvider);
+      const user = res.user;
+      const q = query(
+        collection(this.db, "users"),
+        where("uid", "==", user.uid)
+      );
+      const docs = await getDocs(q);
+      if (docs.docs.length === 0) {
+        await addDoc(collection(this.db, "users"), {
+          uid: user.uid,
+          name: user.displayName,
+          authProvider: "google",
+          email: user.email,
+        });
+      }
+    } catch (err) {
+      console.error(err);
+      alert(err.message);
+    }
+  }
+
+  async addItem(collectionName, product) {
+    const db = getFirestore();
+    const productsRef = collection(db, collectionName);
+
+    // Use the addDoc() method to add a new document to the products collection
+    return await addDoc(productsRef, product)
+      .then((docRef) => {
+        console.log("Document written with ID: ", docRef.id);
+        return docRef.id;
+      })
+      .catch((error) => {
+        console.error("Error adding document: ", error);
+      });
+  }
+
+  async updateProductCos(product) {
+    const db = getFirestore();
+    const productsRef = collection(db, "cos");
+
+    const q = query(
+      productsRef,
+      where("id_produs", "==", product.id_produs),
+      where("user_id", "==", product.user_id)
+    );
+    const querySnapshot = await getDocs(q);
+
+    if (querySnapshot.size !== 1) {
+      await addDoc(productsRef, product)
+        .then((docRef) => {
+          console.log("Document written with ID: ", docRef.id);
+          return "adaug";
+        })
+        .catch((error) => {
+          console.error("Error adding document: ", error);
+        });
+
+      return "adaug";
+    }
+
+    const productDoc = querySnapshot.docs[0];
+    const productRef = doc(db, "cos", productDoc.id);
+
+    try {
+      await updateDoc(productRef, {
+        cantitate: productDoc.get("cantitate") + 1,
+      });
+      console.log("Document successfully updated!");
+      return "update ok";
+    } catch (error) {
+      console.log("Error updating document:", error);
+      return false;
+    }
+  }
+
+  // Read all documents in a collection
+
+  async readDocuments(collectionName, condition) {
+    let q;
+    if (condition == undefined) {
+      q = query(collection(this.db, collectionName));
+    } else {
+      // console.log("asd");
+      q = query(
+        collection(this.db, collectionName),
+        where(condition[0], condition[1], condition[2])
+      );
+    }
+    const querySnapshot = await getDocs(q);
+    const documents = [];
+    querySnapshot.forEach((doc) => {
+      documents.push({ id: doc.id, ...doc.data() });
+    });
+
+    return documents;
+  }
+
+  async getProductById(productId) {
+    const docRef = doc(this.db, "products", productId);
+    const docSnap = await getDoc(docRef);
+    // console.log(docSnap.data().images);
+
+    if (docSnap.exists()) {
+      return { id: docSnap.id, ...docSnap.data() };
+    } else {
+      throw new Error("Product not found.");
+    }
+  }
+  // Update a document in a collection
+  async updateDocument(collectionName, documentId, data) {
+    await this.db
+      .collection(collectionName)
+      .doc(documentId)
+      .update(data)
+      .then(() => {
+        console.log("Document successfully updated!");
+      })
+      .catch((error) => {
+        console.error("Error updating document: ", error);
+      });
+  }
+
+  // Delete a document from a collection
+  async deleteDocument(collectionName, documentId) {
+    await this.db
+      .collection(collectionName)
+      .doc(documentId)
+      .delete()
+      .then(() => {
+        console.log("Document successfully deleted!");
+      })
+      .catch((error) => {
+        console.error("Error removing document: ", error);
+      });
+  }
+}
