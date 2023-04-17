@@ -7,8 +7,8 @@ const firestore = new Firestore();
 function Product({ img, link, name, price, oldPrice, review, id, addit }) {
   const [user, loading, error] = useAuthState(firestore.getuser());
 
-  const addit_prod = async () => {
-    addit(id);
+  const addit_prod = async (cant) => {
+    addit(id, cant);
   };
   /**
    * 
@@ -55,7 +55,7 @@ async function getProduct(productId) {
               <a
                 className="btn btn-outline-dark btn-square"
                 title="Adaugă în coș"
-                onClick={addit_prod}
+                onClick={()=>addit_prod(1)}
               >
                 <i className="fa fa-shopping-cart"></i>
               </a>

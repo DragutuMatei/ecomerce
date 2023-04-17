@@ -6,6 +6,7 @@ import {
   getDocs,
   doc,
   addDoc,
+  deleteDoc,
   getDoc,
   query,
   where,
@@ -72,13 +73,18 @@ export default class Firestore {
       await this.readDocuments("cos", ["user_id", "==", user.uid]).then(
         (res) => {
           for (let i = 0; i < res.length; i++) {
-            cant.push({ id: res[i].id_produs, cant: res[i].cantitate });
+            cant.push({
+              uid: res[i].id,
+              id: res[i].id_produs,
+              cant: res[i].cantitate,
+            });
           }
         }
       );
 
       for (let i = 0; i < cant.length; i++) {
         cant[i] = {
+          uid: cant[i].uid,
           cant: cant[i].cant,
           ...(await this.getProductById(cant[i].id)),
         };
@@ -91,11 +97,11 @@ export default class Firestore {
     return { cant, total };
   }
 
-  async addit(id, user) {
+  async addit(id, user, cant) {
     if (user)
       await this.updateProductCos({
         id_produs: id,
-        cantitate: 1,
+        cantitate: cant,
         user_id: user.uid,
       }).then((res) => {
         console.log(res);
@@ -189,7 +195,7 @@ export default class Firestore {
 
     try {
       await updateDoc(productRef, {
-        cantitate: productDoc.get("cantitate") + 1,
+        cantitate: productDoc.get("cantitate") + product.cantitate,
       });
       console.log("Document successfully updated!");
       return "update ok";
@@ -199,8 +205,24 @@ export default class Firestore {
     }
   }
 
-  // Read all documents in a collection
+  async sortdata(collectionName, by, how) {
+    try {
+      const collectionRef = this.db.collection(collectionName);
 
+      // Query the collection and sort by price in descending order
+      const snapshot = await collectionRef.orderBy(by, how).get();
+
+      // Extract the data from the snapshot
+      const sortedData = snapshot.docs.map((doc) => doc.data());
+
+      return sortedData;
+    } catch (error) {
+      console.error("Error sorting data:", error);
+      throw error;
+    }
+  }
+
+  // Read all documents in a collection
   async readDocuments(collectionName, condition) {
     let q;
     if (condition == undefined) {
@@ -234,29 +256,16 @@ export default class Firestore {
   }
   // Update a document in a collection
   async updateDocument(collectionName, documentId, data) {
-    await this.db
-      .collection(collectionName)
-      .doc(documentId)
-      .update(data)
-      .then(() => {
-        console.log("Document successfully updated!");
-      })
-      .catch((error) => {
-        console.error("Error updating document: ", error);
-      });
+    console.log(collectionName, documentId, data)
+    const ref = doc(this.db, collectionName, documentId);
+
+    // Set the "capital" field of the city 'DC'
+    return await updateDoc(ref, data);
   }
 
   // Delete a document from a collection
   async deleteDocument(collectionName, documentId) {
-    await this.db
-      .collection(collectionName)
-      .doc(documentId)
-      .delete()
-      .then(() => {
-        console.log("Document successfully deleted!");
-      })
-      .catch((error) => {
-        console.error("Error removing document: ", error);
-      });
+    console.log(collectionName, documentId);
+    await deleteDoc(doc(this.db, collectionName, documentId));
   }
 }

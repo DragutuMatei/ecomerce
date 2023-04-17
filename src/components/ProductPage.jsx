@@ -2,18 +2,30 @@ import React, { useEffect, useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import Firestore from "../js/Firestore";
 import ShareButton from "./ShareButton";
+import { useAuthState } from "react-firebase-hooks/auth";
 
 const firestore = new Firestore();
 
-function ProductPage() {
+function ProductPage({ addit }) {
   const navigate = useNavigate();
   const { id } = useParams("id");
+  const [user, loading, error] = useAuthState(firestore.getuser());
   const [produs, setProdus] = useState();
+  const [value, setValue] = useState(1);
   useEffect(() => {
     firestore.getProductById(id).then((res) => {
       setProdus(res);
     });
   }, []);
+  const modi = (by) => {
+    if ((value >= 1 && by > 0) || value >= 2) setValue((old) => old + by);
+  };
+  const addit_prod = async (cant) => {
+    addit(id, cant);
+  };
+  const signInWithGoogle = async () => {
+    await firestore.signInWithGoogle();
+  };
 
   return (
     <>
@@ -107,7 +119,7 @@ function ProductPage() {
               </div>
               <h3 className="font-weight-semi-bold mb-4">$150.00</h3>
               <p className="mb-4">{produs && produs.descriere_scurta}</p>
-              <div className="d-flex mb-3">
+              {/* <div className="d-flex mb-3">
                 <strong className="text-dark mr-3">Sizes:</strong>
                 <form>
                   <div className="custom-control custom-radio custom-control-inline">
@@ -226,31 +238,54 @@ function ProductPage() {
                     </label>
                   </div>
                 </form>
-              </div>
+              </div> */}
               <div className="d-flex align-items-center mb-4 pt-2">
                 <div
                   className="input-group quantity mr-3"
                   style={{ width: "130px" }}
                 >
                   <div className="input-group-btn">
-                    <button className="btn btn-primary btn-minus">
+                    <button
+                      className="btn btn-primary btn-minus"
+                      onClick={() => modi(-1)}
+                    >
                       <i className="fa fa-minus"></i>
                     </button>
                   </div>
                   <input
-                    type="text"
+                    type="number"
                     className="form-control bg-secondary border-0 text-center"
-                    value="1"
+                    value={value}
                   />
                   <div className="input-group-btn">
-                    <button className="btn btn-primary btn-plus">
+                    <button
+                      className="btn btn-primary btn-plus"
+                      onClick={() => modi(1)}
+                    >
                       <i className="fa fa-plus"></i>
                     </button>
                   </div>
                 </div>
-                <button className="btn btn-primary px-3">
-                  <i className="fa fa-shopping-cart mr-1"></i> Add To Cart
-                </button>
+
+                {user ? (
+                  <button
+                    className="btn btn-primary px-3"
+                    onClick={() => addit_prod(value)}
+                  >
+                    <i className="fa fa-shopping-cart mr-1"></i> Add To Cart
+                  </button>
+                ) : (
+                  <h4
+                    style={{
+                      cursor: "pointer",
+                      margin: "5px 20px",
+                      color: "#FFD333",
+                    }}
+                    onClick={signInWithGoogle}
+                  >
+                    Login to add to cart
+                  </h4>
+                )}
               </div>
               <div className="d-flex pt-2">
                 <strong className="text-dark mr-2">Share on:</strong>

@@ -103,9 +103,7 @@ function Navbar({ cos }) {
   // console.log(user);
 
   const [search, setSearch] = useState("");
-  const searchfct = () => {
-    
-  }
+  const searchfct = () => {};
   return (
     <>
       <div className="container-fluid">
@@ -113,10 +111,10 @@ function Navbar({ cos }) {
           <div className="col-lg-4">
             <a href="" className="text-decoration-none">
               <span className="h1 text-uppercase text-primary bg-dark px-2">
-                Multi
+                NAVI
               </span>
               <span className="h1 text-uppercase text-dark bg-primary px-2 ml-n1">
-                Shop
+                SIL
               </span>
             </a>
           </div>
@@ -193,10 +191,10 @@ function Navbar({ cos }) {
             <nav className="navbar navbar-expand-lg bg-dark navbar-dark py-3 py-lg-0 px-0">
               <a href="" className="text-decoration-none d-block d-lg-none">
                 <span className="h1 text-uppercase text-dark bg-light px-2">
-                  Multi
+                  NAVI
                 </span>
                 <span className="h1 text-uppercase text-light bg-primary px-2 ml-n1">
-                  Shop
+                  SIL
                 </span>
               </a>
               <button
@@ -218,9 +216,12 @@ function Navbar({ cos }) {
                   <Link to="/contact" className="nav-item nav-link">
                     Contact
                   </Link>
+                  <Link to="/checkout" className="nav-item nav-link">
+                    Checkout
+                  </Link>
                 </div>
                 <div className="navbar-nav ml-auto py-0 d-none d-lg-block">
-                  <Link to="checkout" className="btn px-0 ml-3">
+                  <Link to="/cart" className="btn px-0 ml-3">
                     <i className="fas fa-shopping-cart text-primary"></i>
                     <span
                       className="badge text-secondary border border-secondary rounded-circle"

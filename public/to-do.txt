@@ -1,6 +1,7 @@
+reviews
+rating
 sorting/filter
 search
-delete cos
 admin page(update, delete, list comenzi)
 final form la comenzi
 

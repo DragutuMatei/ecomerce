@@ -3,19 +3,49 @@ import { Link, useLocation, useParams } from "react-router-dom";
 import Firestore from "../js/Firestore";
 import Product from "./Product";
 import Text from "../util/Text";
-
+let arr = [];
 const firestore = new Firestore();
 function Shop({ addit }) {
-  const { categorie, nume } = useParams();
+  const { categorie, sort_param } = useParams();
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
     firestore
       .readDocuments("products", ["categories", "==", categorie])
       .then((res) => {
+        if (sort_param) {
+          console.log(sort_param);
+          sort(res, sort_param);
+        }
+        arr = res;
         setProducts(res);
       });
-  }, [categorie]);
+  }, [categorie, sort_param]);
+
+  const sort = async (arr, cat) => {
+    switch (cat) {
+      case "pc":
+        console.log("pc acum");
+        arr.sort((a, b) => a.pret - b.pret);
+        // setProducts((prod) => [...prod.sort((a, b) => a.pret - b.pret)]);
+        break;
+      case "pd":
+        arr.sort((a, b) => b.pret - a.pret);
+        // setProducts((prod) => [...prod.sort((a, b) => b.pret - a.pret)]);
+        break;
+      case "nc":
+        arr.sort((a, b) => a.nume.localeCompare(b.nume));
+        // setProducts((prod) => [...prod.sort((a, b) => a.nume - b.nume)]);
+        break;
+      case "nd":
+        arr.sort((a, b) => b.nume.localeCompare(a.nume));
+        // setProducts((prod) => [...prod.sort((a, b) => b.nume - a.nume)]);
+        break;
+    }
+    setProducts([...arr]);
+    console.log("products", products);
+    console.log("arr", arr);
+  };
 
   return (
     <>
@@ -260,8 +290,65 @@ function Shop({ addit }) {
 
           <div className="col-lg-9 col-md-8">
             <div className="row pb-3 products">
-              {products &&
-                products.map((prod) => (
+              <div className="col-12 pb-1">
+                <div className="d-flex align-items-center justify-content-between mb-4">
+                  <div>
+                    <button className="btn btn-sm btn-light">
+                      <i className="fa fa-th-large"></i>
+                    </button>
+                    <button className="btn btn-sm btn-light ml-2">
+                      <i className="fa fa-bars"></i>
+                    </button>
+                  </div>
+                  <div className="ml-2">
+                    <div className="btn-group">
+                      <button
+                        type="button"
+                        className="btn btn-sm btn-light dropdown-toggle"
+                        data-toggle="dropdown"
+                      >
+                        Sorting
+                      </button>
+                      <div className="dropdown-menu dropdown-menu-right">
+                        <Link
+                          to={`/shop/${categorie}/pc`}
+                          className="dropdown-item"
+                          style={{ cursor: "pointer" }}
+                          // onClick={() => sort("pc")}
+                        >
+                          Pret - crescator
+                        </Link>
+                        <Link
+                          to={`/shop/${categorie}/pd`}
+                          className="dropdown-item"
+                          style={{ cursor: "pointer" }}
+                          // onClick={() => sort("pd")}
+                        >
+                          Pret - descrescator
+                        </Link>
+                        <Link
+                          to={`/shop/${categorie}/nc`}
+                          className="dropdown-item"
+                          style={{ cursor: "pointer" }}
+                          // onClick={() => sort("nc")}
+                        >
+                          Nume - crescator
+                        </Link>
+                        <Link
+                          to={`/shop/${categorie}/nd`}
+                          className="dropdown-item"
+                          style={{ cursor: "pointer" }}
+                          // onClick={() => sort("nd")}
+                        >
+                          Nume - descrescator
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {arr &&
+                arr.map((prod) => (
                   <Product
                     key={prod.id}
                     id={prod.id}
