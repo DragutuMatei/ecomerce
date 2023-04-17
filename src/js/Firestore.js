@@ -256,16 +256,60 @@ export default class Firestore {
   }
   // Update a document in a collection
   async updateDocument(collectionName, documentId, data) {
-    console.log(collectionName, documentId, data)
+    console.log(collectionName, documentId, data);
     const ref = doc(this.db, collectionName, documentId);
 
     // Set the "capital" field of the city 'DC'
     return await updateDoc(ref, data);
   }
 
+  async leaveRev(id, rev) {
+    let prod = await this.getProductById(id);
+    let reviews = [...prod.reviews, { ...rev }];
+    prod.reviews = reviews;
+    let rating = prod.rating;
+    if (rating == 0) {
+      rating = rev.rating;
+    } else {
+      rating = (rating + rev.rating) / 2;
+    }
+    prod.rating = rating;
+
+    return await this.updateDocument("products", id, prod);
+  }
+
+  async deleteRev(revi) {
+    const { date, email, nume, rating, review, user } = revi.rev;
+    const id = revi.id;
+
+    const prod = await this.getProductById(id);
+    let { reviews } = prod;
+    let index = 0;
+    prod.reviews.forEach((rev, i, object) => {
+      // console.log(rev.date == date &&
+      //   rev.email == email &&
+      //   rev.nume == nume &&
+      //   rev.rating == rating &&
+      //   rev.review == review )
+      if (
+        rev.date == date &&
+        rev.email == email &&
+        rev.nume == nume &&
+        rev.rating == rating &&
+        rev.review == review &&
+        rev.user.id == rev.uid
+      ) {
+        console.log("i: ", i);
+        index = i;
+      }
+    });
+    console.log(index);
+    reviews.slice(index, index+1)
+    console.log(reviews);
+  }
+
   // Delete a document from a collection
   async deleteDocument(collectionName, documentId) {
-    console.log(collectionName, documentId);
     await deleteDoc(doc(this.db, collectionName, documentId));
   }
 }

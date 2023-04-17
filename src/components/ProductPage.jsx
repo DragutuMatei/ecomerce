@@ -27,6 +27,108 @@ function ProductPage({ addit }) {
     await firestore.signInWithGoogle();
   };
 
+  const getdate = () => {
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    let mm = today.getMonth() + 1; // Months start at 0!
+    let dd = today.getDate();
+
+    if (dd < 10) dd = "0" + dd;
+    if (mm < 10) mm = "0" + mm;
+
+    const formattedToday = dd + "/" + mm + "/" + yyyy;
+    return formattedToday;
+  };
+  const [review, setReview] = useState({
+    rating: 0,
+    review: "",
+    nume: "",
+    email: "",
+    user: {
+      id: user && user.uid,
+      img: user && user.photoURL,
+    },
+    date: getdate(),
+  });
+
+  useEffect(() => {
+    handlerev("user", {
+      id: user && user.uid,
+      img: user && user.photoURL,
+    });
+  }, [user]);
+
+  const handlerev = (field, e) => {
+    setReview((old) => ({
+      ...old,
+      [field]: e,
+    }));
+  };
+
+  const [rated, setRated] = useState(-1);
+
+  const rate = (stars) => {
+    handlerev("rating", stars);
+    setRated(stars);
+    for (let i = 0; i < stars; i++) {
+      document.querySelectorAll(".STEA_REV")[i].classList.remove("fa-star");
+      document.querySelectorAll(".STEA_REV")[i].classList.remove("far");
+      document.querySelectorAll(".STEA_REV")[i].classList.add("fas");
+      document.querySelectorAll(".STEA_REV")[i].classList.add("fa-star");
+    }
+    for (let i = stars; i < 5; i++) {
+      document.querySelectorAll(".STEA_REV")[i].classList.remove("fa-star");
+      document.querySelectorAll(".STEA_REV")[i].classList.remove("fas");
+      document.querySelectorAll(".STEA_REV")[i].classList.add("far");
+      document.querySelectorAll(".STEA_REV")[i].classList.add("fa-star");
+    }
+  };
+
+  const ratehover = (k) => {
+    for (let i = 0; i < k; i++) {
+      document.querySelectorAll(".STEA_REV")[i].classList.remove("fa-star");
+      document.querySelectorAll(".STEA_REV")[i].classList.remove("far");
+      document.querySelectorAll(".STEA_REV")[i].classList.add("fas");
+      document.querySelectorAll(".STEA_REV")[i].classList.add("fa-star");
+    }
+  };
+
+  const notratehover = (k) => {
+    if (rated == -1)
+      for (let i = 0; i < k; i++) {
+        document.querySelectorAll(".STEA_REV")[i].classList.remove("fa-star");
+        document.querySelectorAll(".STEA_REV")[i].classList.remove("fas");
+        document.querySelectorAll(".STEA_REV")[i].classList.add("far");
+        document.querySelectorAll(".STEA_REV")[i].classList.add("fa-star");
+      }
+    else {
+      console.log("rated: ", rated);
+      for (let i = 0; i < rated; i++) {
+        document.querySelectorAll(".STEA_REV")[i].classList.remove("fa-star");
+        document.querySelectorAll(".STEA_REV")[i].classList.remove("far");
+        document.querySelectorAll(".STEA_REV")[i].classList.add("fas");
+        document.querySelectorAll(".STEA_REV")[i].classList.add("fa-star");
+      }
+      for (let i = rated; i < k; i++) {
+        document.querySelectorAll(".STEA_REV")[i].classList.remove("fa-star");
+        document.querySelectorAll(".STEA_REV")[i].classList.remove("fas");
+        document.querySelectorAll(".STEA_REV")[i].classList.add("far");
+        document.querySelectorAll(".STEA_REV")[i].classList.add("fa-star");
+      }
+    }
+  };
+  const leaverev = async () => {
+    await firestore.leaveRev(id, review).then((res) => {
+      console.log(res);
+      firestore.getProductById(id).then((res) => {
+        setProdus(res);
+      });
+    });
+  };
+
+  const delete_rev = async (rev) => {
+    await firestore.deleteRev({ rev, id, uid: user.uid });
+  };
   return (
     <>
       <div className="container-fluid">
@@ -117,7 +219,9 @@ function ProductPage({ addit }) {
                 </div>
                 <small className="pt-1">({produs && produs.rating})</small>
               </div>
-              <h3 className="font-weight-semi-bold mb-4">$150.00</h3>
+              <h3 className="font-weight-semi-bold mb-4">
+                ${produs && produs.pret}
+              </h3>
               <p className="mb-4">{produs && produs.descriere_scurta}</p>
               {/* <div className="d-flex mb-3">
                 <strong className="text-dark mr-3">Sizes:</strong>
@@ -313,7 +417,7 @@ function ProductPage({ addit }) {
             <div className="bg-light p-30">
               <div className="nav nav-tabs mb-4">
                 <a
-                  className="nav-item nav-link text-dark active"
+                  className="nav-item nav-link text-dark "
                   data-toggle="tab"
                   href="#tab-pane-1"
                 >
@@ -327,15 +431,15 @@ function ProductPage({ addit }) {
                   Information
                 </a>
                 <a
-                  className="nav-item nav-link text-dark"
+                  className="nav-item nav-link text-dark active"
                   data-toggle="tab"
                   href="#tab-pane-3"
                 >
-                  Reviews ({produs && produs.reviews})
+                  Reviews (3)
                 </a>
               </div>
               <div className="tab-content">
-                <div className="tab-pane fade show active" id="tab-pane-1">
+                <div className="tab-pane fade" id="tab-pane-1">
                   <h4 className="mb-3">Product Description</h4>
                   <p>{produs && produs.descriere_lunga}</p>
                 </div>
@@ -383,91 +487,172 @@ function ProductPage({ addit }) {
                     </div>
                   </div> */}
                 </div>
-                <div className="tab-pane fade" id="tab-pane-3">
+                <div className="tab-pane fade show active" id="tab-pane-3">
                   <div className="row">
                     <div className="col-md-6">
-                      <h4 className="mb-4">1 review for "Product Name"</h4>
-                      <div className="media mb-4">
-                        <img
-                          src="img/user.jpg"
-                          alt="Image"
-                          className="img-fluid mr-3 mt-1"
-                          style={{ width: 45 }}
-                        />
-                        <div className="media-body">
-                          <h6>
-                            John Doe
-                            <small>
-                              {" "}
-                              - <i>01 Jan 2045</i>
-                            </small>
-                          </h6>
-                          <div className="text-primary mb-2">
-                            <i className="fas fa-star"></i>
-                            <i className="fas fa-star"></i>
-                            <i className="fas fa-star"></i>
-                            <i className="fas fa-star-half-alt"></i>
-                            <i className="far fa-star"></i>
+                      <h4 className="mb-4">
+                        ({produs && produs.reviews.length}) reviews for{" "}
+                        {produs && produs.nume}
+                      </h4>
+                      {produs &&
+                        produs.reviews.map((rev, index) => {
+                          return (
+                            <>
+                              <div className="media mb-4" key={index}>
+                                <img
+                                  src={rev.user.img}
+                                  alt="Image"
+                                  className="img-fluid mr-3 mt-1"
+                                  style={{ width: 45 }}
+                                />
+                                <div className="media-body">
+                                  <h6>
+                                    {rev.nume}
+                                    <small>
+                                      {" "}
+                                      - <i>{rev.date}</i>
+                                    </small>
+                                  </h6>
+                                  <div className="text-primary mb-2">
+                                    {[...Array(5)].map((e, index) => {
+                                      return (
+                                        <>
+                                          {index >= rev.rating ? (
+                                            <i
+                                              className="far fa-star"
+                                              key={index}
+                                            ></i>
+                                          ) : (
+                                            <i
+                                              className="fas fa-star"
+                                              key={index}
+                                            ></i>
+                                          )}
+                                        </>
+                                      );
+                                    })}
+                                  </div>
+                                  <p>{rev.review} </p>
+                                  {user && rev.user.id == user.uid && (
+                                    <>
+                                      <button
+                                        className="btn btn-primary px-3"
+                                        onClick={() => {
+                                          delete_rev(rev);
+                                        }}
+                                      >
+                                        Delete review
+                                      </button>
+                                    </>
+                                  )}
+                                </div>
+                              </div>
+                            </>
+                          );
+                        })}
+                    </div>
+                    {user ? (
+                      <>
+                        <div className="col-md-6">
+                          <h4 className="mb-4">Leave a review</h4>
+                          <small>
+                            Your email address will not be published. Required
+                            fields are marked *
+                          </small>
+                          <div className="d-flex my-3">
+                            <p className="mb-0 mr-2">Your Rating * :</p>
+                            <div className="text-primary">
+                              <i
+                                style={{ cursor: "pointer" }}
+                                className="far fa-star STEA_REV"
+                                onMouseEnter={() => ratehover(1)}
+                                onMouseLeave={() => notratehover(1)}
+                                onClick={() => rate(1)}
+                              ></i>
+                              <i
+                                style={{ cursor: "pointer" }}
+                                onClick={() => rate(2)}
+                                className="far fa-star STEA_REV"
+                                onMouseEnter={() => ratehover(2)}
+                                onMouseLeave={() => notratehover(2)}
+                              ></i>
+                              <i
+                                style={{ cursor: "pointer" }}
+                                onClick={() => rate(3)}
+                                className="far fa-star STEA_REV"
+                                onMouseEnter={() => ratehover(3)}
+                                onMouseLeave={() => notratehover(3)}
+                              ></i>
+                              <i
+                                className="far fa-star STEA_REV"
+                                onClick={() => rate(4)}
+                                style={{ cursor: "pointer" }}
+                                onMouseEnter={() => ratehover(4)}
+                                onMouseLeave={() => notratehover(4)}
+                              ></i>
+                              <i
+                                className="far fa-star STEA_REV"
+                                onClick={() => rate(5)}
+                                style={{ cursor: "pointer" }}
+                                onMouseEnter={() => ratehover(5)}
+                                onMouseLeave={() => notratehover(5)}
+                              ></i>
+                            </div>
                           </div>
-                          <p>
-                            Diam amet duo labore stet elitr ea clita ipsum,
-                            tempor labore accusam ipsum et no at. Kasd diam
-                            tempor rebum magna dolores sed sed eirmod ipsum.
-                          </p>
+                          <div>
+                            <div className="form-group">
+                              <label htmlFor="message">Your Review *</label>
+                              <textarea
+                                id="message"
+                                cols="30"
+                                rows="5"
+                                required
+                                onChange={(e) =>
+                                  handlerev("review", e.target.value)
+                                }
+                                className="form-control"
+                              ></textarea>
+                            </div>
+                            <div className="form-group">
+                              <label htmlFor="name">Your Name *</label>
+                              <input
+                                required
+                                onChange={(e) =>
+                                  handlerev("nume", e.target.value)
+                                }
+                                type="text"
+                                className="form-control"
+                                id="name"
+                              />
+                            </div>
+                            <div className="form-group">
+                              <label htmlFor="email">Your Email *</label>
+                              <input
+                                type="email"
+                                required
+                                onChange={(e) =>
+                                  handlerev("email", e.target.value)
+                                }
+                                className="form-control"
+                                id="email"
+                              />
+                            </div>
+                            <div className="form-group mb-0">
+                              <button
+                                className="btn btn-primary px-3"
+                                onClick={leaverev}
+                              >
+                                Leave Your Review
+                              </button>
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    </div>
-                    <div className="col-md-6">
-                      <h4 className="mb-4">Leave a review</h4>
-                      <small>
-                        Your email address will not be published. Required
-                        fields are marked *
-                      </small>
-                      <div className="d-flex my-3">
-                        <p className="mb-0 mr-2">Your Rating * :</p>
-                        <div className="text-primary">
-                          <i className="far fa-star"></i>
-                          <i className="far fa-star"></i>
-                          <i className="far fa-star"></i>
-                          <i className="far fa-star"></i>
-                          <i className="far fa-star"></i>
-                        </div>
-                      </div>
-                      <form>
-                        <div className="form-group">
-                          <label htmlFor="message">Your Review *</label>
-                          <textarea
-                            id="message"
-                            cols="30"
-                            rows="5"
-                            className="form-control"
-                          ></textarea>
-                        </div>
-                        <div className="form-group">
-                          <label htmlFor="name">Your Name *</label>
-                          <input
-                            type="text"
-                            className="form-control"
-                            id="name"
-                          />
-                        </div>
-                        <div className="form-group">
-                          <label htmlFor="email">Your Email *</label>
-                          <input
-                            type="email"
-                            className="form-control"
-                            id="email"
-                          />
-                        </div>
-                        <div className="form-group mb-0">
-                          <input
-                            type="submit"
-                            value="Leave Your Review"
-                            className="btn btn-primary px-3"
-                          />
-                        </div>
-                      </form>
-                    </div>
+                      </>
+                    ) : (
+                      <>
+                        <h4>Logheaza te pentru a alasa un review</h4>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>

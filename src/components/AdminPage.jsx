@@ -29,7 +29,7 @@ function AdminPage() {
     old_pret: 0,
     pret: 0,
     rating: 0,
-    reviews: 0,
+    reviews: [],
     categories: "",
     cantitate: 0,
     images: [],
@@ -110,7 +110,7 @@ function AdminPage() {
     old_pret: 0,
     pret: 0,
     rating: 0,
-    reviews: 0,
+    reviews: [],
     categories: "",
     cantitate: 0,
     images: [],
@@ -198,6 +198,12 @@ function AdminPage() {
     // handleChange(files);
     handleAdd(files);
     handleChange(files);
+  };
+  const delete_mes = async (id) => {
+    await firestore.deleteDocument("contact", id).then((res) => {
+      getMesajeContact();
+      alert("mesaj sters!");
+    });
   };
   return (
     <>
@@ -454,7 +460,7 @@ function AdminPage() {
           mesajeContact.map((mes) => {
             return (
               <>
-                <div>
+                <div key={mes.id}>
                   <h4>
                     {" "}
                     <b> {mes.nume}</b> -{" "}
@@ -466,6 +472,9 @@ function AdminPage() {
                     {mes.subject} <b>-</b>
                   </h5>
                   <p>{mes.message}</p>
+                  <button onClick={() => delete_mes(mes.id)}>
+                    Delete mesaj
+                  </button>
                 </div>
                 <hr />
                 <br />
