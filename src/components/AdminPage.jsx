@@ -3,13 +3,7 @@ import Firestore from "../js/Firestore";
 import firebase from "firebase/compat/app";
 import "firebase/storage";
 
-import {
-  getStorage,
-  uploadString,
-  ref,
-  uploadBytes,
-  getDownloadURL,
-} from "firebase/storage";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import Placeholder from "../util/Placeholder";
 
 const firestore = new Firestore();
@@ -17,6 +11,14 @@ const storage = getStorage();
 
 function AdminPage() {
   //get categories
+  const [mesajeContact, setMesajeContact] = useState([]);
+
+  const getMesajeContact = async () => {
+    firestore.readDocuments("contact").then((res) => {
+      setMesajeContact(res);
+    });
+  };
+
   const [categories, setCategories] = useState([]);
   const [newItem, setNewItem] = useState({
     nume: "",
@@ -46,6 +48,7 @@ function AdminPage() {
   };
 
   useEffect(() => {
+    getMesajeContact();
     getCategories();
     getProducts();
   }, []);
@@ -152,10 +155,10 @@ function AdminPage() {
 
     console.log(idk);
 
-    await firestore.updateDocument("products", idk.id, idk).then(res => {
+    await firestore.updateDocument("products", idk.id, idk).then((res) => {
       getProducts();
-      alert("produs updatat")
-    })
+      alert("produs updatat");
+    });
   };
 
   const deletef = async (id) => {
@@ -172,19 +175,6 @@ function AdminPage() {
     );
     setUpdateItem({ ...updateItem, images: updatedArray });
   };
-  const addObject = (newObject) => {
-    // Check if the object already exists in the array
-    const objectExists = updateItem.some((obj) => obj.id === newObject.id);
-
-    if (!objectExists) {
-      // If object does not exist, add it to the array
-      setUpdateItem((prevObjects) => [...prevObjects, newObject]);
-    } else {
-      // If object already exists, display an error or perform desired action
-      console.error("Object already exists in the array:", newObject);
-    }
-  };
-
   const handleAdd = (newElement) => {
     const updatedArray = [...updateItem.images, ...newElement];
     // const updatedArray = [...updateItem.images, newElement];
@@ -209,63 +199,9 @@ function AdminPage() {
     handleAdd(files);
     handleChange(files);
   };
-
-  function getImagesAsStrings(files, callback) {
-    const reader = new FileReader();
-    const imageStrings = [];
-    let counter = 0;
-
-    const readNextFile = () => {
-      if (counter < files.length) {
-        const file = files[counter];
-        reader.readAsDataURL(file);
-        reader.onload = () => {
-          const imageString = reader.result;
-          imageStrings.push(imageString);
-          counter++;
-          readNextFile();
-        };
-        reader.onerror = (error) => {
-          callback(error);
-        };
-      } else {
-        callback(null, imageStrings);
-      }
-    };
-
-    readNextFile();
-  }
-  function decodeImages(imageStrings, callback) {
-    const decodedImages = [];
-    let counter = 0;
-
-    const decodeNextImage = () => {
-      if (counter < imageStrings.length) {
-        const imageString = imageStrings[counter];
-        const base64 = imageString.split(",")[1];
-        const decodedImage = atob(base64);
-        decodedImages.push(decodedImage);
-        counter++;
-        decodeNextImage();
-      } else {
-        callback(null, decodedImages);
-      }
-    };
-
-    decodeNextImage();
-  }
-  // Decode base64 strings to images
-  function decodeBase64ToImages(base64Strings) {
-    const decodedImages = base64Strings.map((base64String) => {
-      const image = new Image();
-      image.src = base64String;
-      return image;
-    });
-    return decodedImages;
-  }
   return (
     <>
-      <div>
+      <div style={{ margin: "0 30px" }}>
         <section className="addSection">
           <textarea
             placeholder="nume"
@@ -333,7 +269,7 @@ function AdminPage() {
         <br />
         <br />
         <hr />
-        <section className="prods" security={{ margin: "0 20px" }}>
+        <section className="prods">
           {updateState && (
             <section id="update">
               <h1>Update form:</h1>
@@ -508,6 +444,34 @@ function AdminPage() {
               );
             })}
         </section>
+      </div>
+      <br />
+      <hr />
+      <br />
+      <div style={{ margin: "0 30px" }}>
+        <h1>Mesaje: </h1>
+        {mesajeContact &&
+          mesajeContact.map((mes) => {
+            return (
+              <>
+                <div>
+                  <h4>
+                    {" "}
+                    <b> {mes.nume}</b> -{" "}
+                    <a href={`mailto: ${mes.email}`}>{mes.email}</a>{" "}
+                  </h4>
+                  <h5>
+                    {" "}
+                    <b>-</b>
+                    {mes.subject} <b>-</b>
+                  </h5>
+                  <p>{mes.message}</p>
+                </div>
+                <hr />
+                <br />
+              </>
+            );
+          })}
       </div>
     </>
   );
