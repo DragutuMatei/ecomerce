@@ -3,6 +3,7 @@ import { Link, useParams, useNavigate } from "react-router-dom";
 import Firestore from "../js/Firestore";
 import ShareButton from "./ShareButton";
 import { useAuthState } from "react-firebase-hooks/auth";
+import Placeholder from "../util/Placeholder";
 
 const firestore = new Firestore();
 
@@ -27,18 +28,6 @@ function ProductPage({ addit }) {
     await firestore.signInWithGoogle();
   };
 
-  const getdate = () => {
-    const today = new Date();
-    const yyyy = today.getFullYear();
-    let mm = today.getMonth() + 1; // Months start at 0!
-    let dd = today.getDate();
-
-    if (dd < 10) dd = "0" + dd;
-    if (mm < 10) mm = "0" + mm;
-
-    const formattedToday = dd + "/" + mm + "/" + yyyy;
-    return formattedToday;
-  };
   const [review, setReview] = useState({
     rating: 0,
     review: "",
@@ -48,7 +37,7 @@ function ProductPage({ addit }) {
       id: user && user.uid,
       img: user && user.photoURL,
     },
-    date: getdate(),
+    date: Placeholder.getdate(),
   });
 
   useEffect(() => {
@@ -449,7 +438,9 @@ function ProductPage({ addit }) {
                   data-toggle="tab"
                   href="#tab-pane-3"
                 >
-                  Reviews ({produs && produs.reviews.length})
+                  Reviews ({produs &&
+                        produs.reviews &&
+                        produs.reviews.length})
                 </a>
               </div>
               <div className="tab-content">
@@ -505,10 +496,11 @@ function ProductPage({ addit }) {
                   <div className="row">
                     <div className="col-md-6">
                       <h4 className="mb-4">
-                        ({produs && produs.reviews.length}) reviews for{" "}
-                        {produs && produs.nume}
+                        ({produs && produs.reviews && produs.reviews.length})
+                        reviews for {produs && produs.nume}
                       </h4>
                       {produs &&
+                        produs.reviews &&
                         produs.reviews.map((rev, index) => {
                           return (
                             <>

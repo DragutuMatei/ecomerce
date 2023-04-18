@@ -42,7 +42,7 @@ function AdminPage() {
   };
 
   const getCategories = async () => {
-    firestore.readDocuments("categories").then((res) => {
+    await firestore.readDocuments("categories").then((res) => {
       setCategories(res);
     });
   };
@@ -95,6 +95,8 @@ function AdminPage() {
     // console.log(newItem);
 
     await firestore.addItem("products", idk);
+    getProducts();
+    alert("Produs adaugat");
   };
 
   const see = () => {
@@ -205,6 +207,26 @@ function AdminPage() {
       alert("mesaj sters!");
     });
   };
+
+  const [cate, setcate] = useState("");
+  const addc = async () => {
+    await firestore
+      .addItem("categories", {
+        categorie: cate,
+        date: Placeholder.getdate(),
+      })
+      .then((res) => {
+        getCategories();
+        alert("Categorie adaugata");
+      });
+  };
+  const deletecat = async (id) => {
+    await firestore.deleteDocument("categories", id).then((res) => {
+      getCategories();
+      alert("Categorie stearsa");
+    });
+  };
+
   return (
     <>
       <div style={{ margin: "0 30px" }}>
@@ -215,15 +237,16 @@ function AdminPage() {
               <input
                 placeholder="Nume Produs"
                 onChange={(e) => modifield("nume", e.target.value)}
-              // cols="30"
-              // rows="10"
+                // cols="30"
+                // rows="10"
               ></input>
             </div>
             <div className="categorieProdus">
               <div>
-
                 <div className="addCategorie">Categorie</div>
-                <select onChange={(e) => modifield("categories", e.target.value)}>
+                <select
+                  onChange={(e) => modifield("categories", e.target.value)}
+                >
                   <option>Alege o caterogie</option>
                   {categories &&
                     categories.map((cat) => (
@@ -245,7 +268,9 @@ function AdminPage() {
                   <div>Pret</div>
                   <input
                     type="number"
-                    onChange={(e) => modifield("pret", parseFloat(e.target.value))}
+                    onChange={(e) =>
+                      modifield("pret", parseFloat(e.target.value))
+                    }
                     placeholder="Pret de vanzare"
                   />
                 </div>
@@ -253,7 +278,9 @@ function AdminPage() {
                   <div>Pret anterior</div>
                   <input
                     type="number"
-                    onChange={(e) => modifield("old_pret", parseFloat(e.target.value))}
+                    onChange={(e) =>
+                      modifield("old_pret", parseFloat(e.target.value))
+                    }
                     placeholder="Pret anterior"
                   />
                 </div>
@@ -307,14 +334,20 @@ function AdminPage() {
                 <div>Cantitate Produs</div>
                 <input
                   type="number"
-                  onChange={(e) => modifield("cantitate", parseFloat(e.target.value))}
+                  onChange={(e) =>
+                    modifield("cantitate", parseFloat(e.target.value))
+                  }
                   placeholder="cantitate"
                 />
               </div>
             </div>
             <div className="actiuniProdus">
-              <button className="button-6" onClick={handleSubmit}>ADAUGA</button>
-              <button className="button-6" onClick={see}>VIZUALIZEAZA</button>
+              <button className="button-6" onClick={handleSubmit}>
+                ADAUGA
+              </button>
+              <button className="button-6" onClick={see}>
+                VIZUALIZEAZA
+              </button>
             </div>
           </div>
         </section>
@@ -527,6 +560,26 @@ function AdminPage() {
               </>
             );
           })}
+      </div>
+      <div style={{ margin: "0 30px" }}>
+        <h1>Categorii: </h1>
+        <input type="text" onChange={(e) => setcate(e.target.value)} />
+        <button onClick={addc}>add categorie</button>
+        <br />
+        {categories &&
+          categories.map((cat) => (
+            <>
+              <div key={cat.categorie}>
+                <h3> {cat.categorie}</h3>
+                <button onClick={() => deletecat(cat.id)}>
+                  delete categorie
+                </button>
+              </div>
+              <hr />
+              <br />
+              <br />
+            </>
+          ))}
       </div>
     </>
   );
