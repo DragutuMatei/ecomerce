@@ -63,52 +63,8 @@ function Checkout({addit}) {
                     style={{ alignItems: "center" }}
                   >
                     <Link to={`/prod/${prod.id}`}>
-                      <p>{Text.returnSizedText(prod.nume)}</p>
-                    </Link>
-                    <div className="input-group quantity">
-                      <div className="input-group-btn">
-                        <button
-                          className="btn btn-primary btn-minus"
-                          onClick={() => modi(-1)}
-                        >
-                          <i className="fa fa-minus"></i>
-                        </button>
-                      </div>
-                      <input
-                        type="number"
-                        className="form-control bg-secondary border-0 text-center"
-                        value={prod.cant}
-                      />
-                      <div className="input-group-btn">
-                        <button
-                          className="btn btn-primary btn-plus"
-                          onClick={() => modi(1)}
-                        >
-                          <i className="fa fa-plus"></i>
-                        </button>
-                        {user ? (
-                          <button
-                            className="btn btn-primary px-3 ml-1" 
-                            onClick={() => addit_prod(value)}
-                          >
-                            <i className="fa fa-shopping-cart mr-1"></i>
-                            Update
-                            Cart
-                          </button>
-                        ) : (
-                          <h4
-                            style={{
-                              cursor: "pointer",
-                              margin: "5px 20px",
-                              color: "#FFD333",
-                            }}
-                            onClick={signInWithGoogle}
-                          >
-                            Login to update cart
-                          </h4>
-                        )}
-                      </div>
-                    </div>
+                      <p>{prod.nume}</p>
+                    </Link> 
                     <p style={{ margin: 0, textAlign: "end" }}>
                       {prod.cant.toLocaleString("en-US")} x $
                       {prod.pret.toLocaleString("en-US")}
@@ -191,15 +147,7 @@ function Checkout({addit}) {
                     placeholder="123 Street"
                   />
                 </div>
-                <div className="col-md-6 form-group">
-                  <label>Country</label>
-                  <select className="custom-select">
-                    <option>United States</option>
-                    <option>Afghanistan</option>
-                    <option>Albania</option>
-                    <option>Algeria</option>
-                  </select>
-                </div>
+                 
                 <div className="col-md-6 form-group">
                   <label>City</label>
                   <input
@@ -289,25 +237,9 @@ function Checkout({addit}) {
                       placeholder="123 Street"
                     />
                   </div>
-                  <div className="col-md-6 form-group">
-                    <label>Country</label>
-                    <select className="custom-select">
-                      <option>United States</option>
-                      <option>Afghanistan</option>
-                      <option>Albania</option>
-                      <option>Algeria</option>
-                    </select>
-                  </div>
+               
                   <div className="col-md-6 form-group">
                     <label>City</label>
-                    <input
-                      className="form-control"
-                      type="text"
-                      placeholder="New York"
-                    />
-                  </div>
-                  <div className="col-md-6 form-group">
-                    <label>State</label>
                     <input
                       className="form-control"
                       type="text"

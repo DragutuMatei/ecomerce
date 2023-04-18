@@ -250,8 +250,6 @@ export default class Firestore {
 
     if (docSnap.exists()) {
       return { id: docSnap.id, ...docSnap.data() };
-    } else {
-      throw new Error("Product not found.");
     }
   }
   // Update a document in a collection
@@ -286,26 +284,22 @@ export default class Firestore {
     let { reviews } = prod;
     let index = 0;
     prod.reviews.forEach((rev, i, object) => {
-      // console.log(rev.date == date &&
-      //   rev.email == email &&
-      //   rev.nume == nume &&
-      //   rev.rating == rating &&
-      //   rev.review == review )
       if (
         rev.date == date &&
         rev.email == email &&
         rev.nume == nume &&
         rev.rating == rating &&
         rev.review == review &&
-        rev.user.id == rev.uid
+        rev.user.id == revi.uid
       ) {
-        console.log("i: ", i);
         index = i;
       }
     });
-    console.log(index);
-    reviews.slice(index, index+1)
-    console.log(reviews);
+    reviews.splice(index, 1);
+
+    prod.reviews = reviews;
+
+    return await this.updateDocument("products", id, prod);
   }
 
   // Delete a document from a collection

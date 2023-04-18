@@ -127,7 +127,12 @@ function ProductPage({ addit }) {
   };
 
   const delete_rev = async (rev) => {
-    await firestore.deleteRev({ rev, id, uid: user.uid });
+    console.log(rev);
+    await firestore.deleteRev({ rev, id, uid: user.uid }).then((res) => {
+      firestore.getProductById(id).then((res) => {
+        setProdus(res);
+      });
+    });
   };
   return (
     <>
@@ -211,13 +216,22 @@ function ProductPage({ addit }) {
               <h3>{produs && produs.nume}</h3>
               <div className="d-flex mb-3">
                 <div className="text-primary mr-2">
-                  <small className="fas fa-star"></small>
-                  <small className="fas fa-star"></small>
-                  <small className="fas fa-star"></small>
-                  <small className="fas fa-star-half-alt"></small>
-                  <small className="far fa-star"></small>
+                  {produs &&
+                    [...Array(5)].map((e, index) => {
+                      return (
+                        <>
+                          {index >= produs.rating ? (
+                            <i className="far fa-star" key={index}></i>
+                          ) : (
+                            <i className="fas fa-star" key={index}></i>
+                          )}
+                        </>
+                      );
+                    })}
                 </div>
-                <small className="pt-1">({produs && produs.rating})</small>
+                <small className="pt-1">
+                  ({produs && Math.round(produs.rating * 100) / 100})
+                </small>
               </div>
               <h3 className="font-weight-semi-bold mb-4">
                 ${produs && produs.pret}
@@ -417,7 +431,7 @@ function ProductPage({ addit }) {
             <div className="bg-light p-30">
               <div className="nav nav-tabs mb-4">
                 <a
-                  className="nav-item nav-link text-dark "
+                  className="nav-item nav-link text-dark active"
                   data-toggle="tab"
                   href="#tab-pane-1"
                 >
@@ -431,15 +445,15 @@ function ProductPage({ addit }) {
                   Information
                 </a>
                 <a
-                  className="nav-item nav-link text-dark active"
+                  className="nav-item nav-link text-dark "
                   data-toggle="tab"
                   href="#tab-pane-3"
                 >
-                  Reviews (3)
+                  Reviews ({produs && produs.reviews.length})
                 </a>
               </div>
               <div className="tab-content">
-                <div className="tab-pane fade" id="tab-pane-1">
+                <div className="tab-pane fade show active" id="tab-pane-1">
                   <h4 className="mb-3">Product Description</h4>
                   <p>{produs && produs.descriere_lunga}</p>
                 </div>
@@ -487,7 +501,7 @@ function ProductPage({ addit }) {
                     </div>
                   </div> */}
                 </div>
-                <div className="tab-pane fade show active" id="tab-pane-3">
+                <div className="tab-pane fade " id="tab-pane-3">
                   <div className="row">
                     <div className="col-md-6">
                       <h4 className="mb-4">
