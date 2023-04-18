@@ -90,7 +90,14 @@ function Cart({ delete_prod_app, update }) {
                 </tr>
               </thead>
               <tbody className="align-middle cosul_blana">
-                {products &&
+                {!user ? (
+                  <tr>
+                    <td>
+                    <h3>Logheaza te ca sa adaugi in cos produse</h3>
+                    </td>
+                  </tr>
+                ) : (
+                  products &&
                   products.map((prod) => {
                     let total_map = prod.pret * prod.cant;
 
@@ -172,7 +179,8 @@ function Cart({ delete_prod_app, update }) {
                         </td>
                       </tr>
                     );
-                  })}
+                  })
+                )}
               </tbody>
             </table>
           </div>
@@ -201,9 +209,13 @@ function Cart({ delete_prod_app, update }) {
                     ${total ? Placeholder.makenumber(total + ship) : "..."}
                   </h5>
                 </div>
-                <button className="btn btn-block btn-primary font-weight-bold my-3 py-3">
-                  Proceed To Checkout
-                </button>
+                {user && (
+                  <Link to="/checkout">
+                    <button className="btn btn-block btn-primary font-weight-bold my-3 py-3">
+                      Proceed To Checkout
+                    </button>
+                  </Link>
+                )}
               </div>
             </div>
           </div>

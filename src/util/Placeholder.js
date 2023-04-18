@@ -18,4 +18,8 @@ export default class Placeholder {
     const formattedToday = dd + "/" + mm + "/" + yyyy;
     return formattedToday;
   }
+
+  static roundit(num) {
+    return Math.round(num * 100) / 100;
+  }
 }

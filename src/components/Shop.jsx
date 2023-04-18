@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link, useLocation, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import Firestore from "../js/Firestore";
 import Product from "./Product";
 import Text from "../util/Text";
@@ -14,7 +14,7 @@ function Shop({ addit }) {
       .readDocuments("products", ["categories", "==", categorie])
       .then((res) => {
         if (sort_param) {
-          console.log(sort_param);
+          // console.log(sort_param);
           sort(res, sort_param);
         }
         arr = res;
@@ -25,7 +25,7 @@ function Shop({ addit }) {
   const sort = async (arr, cat) => {
     switch (cat) {
       case "pc":
-        console.log("pc acum");
+        // console.log("pc acum");
         arr.sort((a, b) => a.pret - b.pret);
         // setProducts((prod) => [...prod.sort((a, b) => a.pret - b.pret)]);
         break;
@@ -43,8 +43,8 @@ function Shop({ addit }) {
         break;
     }
     setProducts([...arr]);
-    console.log("products", products);
-    console.log("arr", arr);
+    // console.log("products", products);
+    // console.log("arr", arr);
   };
 
   return (
@@ -358,7 +358,7 @@ function Shop({ addit }) {
                     name={Text.returnSizedText(prod.nume)}
                     price={prod.pret}
                     oldPrice={prod.old_pret}
-                    review={prod.rating}
+                    rating={prod.rating}
                   />
                 ))}
             </div>

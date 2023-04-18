@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import Firestore from "../js/Firestore";
-import ShareButton from "./ShareButton";
 import { useAuthState } from "react-firebase-hooks/auth";
 import Placeholder from "../util/Placeholder";
+import Product from "./Product";
+import Text from "../util/Text";
 
 const firestore = new Firestore();
 
@@ -16,6 +17,7 @@ function ProductPage({ addit }) {
   useEffect(() => {
     firestore.getProductById(id).then((res) => {
       setProdus(res);
+      getAlso(res.categories);
     });
   }, []);
   const modi = (by) => {
@@ -31,11 +33,11 @@ function ProductPage({ addit }) {
   const [review, setReview] = useState({
     rating: 0,
     review: "",
-    nume: "",
-    email: "",
     user: {
       id: user && user.uid,
       img: user && user.photoURL,
+      email: user && user.email,
+      nume: user && user.displayName,
     },
     date: Placeholder.getdate(),
   });
@@ -44,6 +46,8 @@ function ProductPage({ addit }) {
     handlerev("user", {
       id: user && user.uid,
       img: user && user.photoURL,
+      email: user && user.email,
+      nume: user && user.displayName,
     });
   }, [user]);
 
@@ -91,7 +95,7 @@ function ProductPage({ addit }) {
         document.querySelectorAll(".STEA_REV")[i].classList.add("fa-star");
       }
     else {
-      console.log("rated: ", rated);
+      // console.log("rated: ", rated);
       for (let i = 0; i < rated; i++) {
         document.querySelectorAll(".STEA_REV")[i].classList.remove("fa-star");
         document.querySelectorAll(".STEA_REV")[i].classList.remove("far");
@@ -108,7 +112,7 @@ function ProductPage({ addit }) {
   };
   const leaverev = async () => {
     await firestore.leaveRev(id, review).then((res) => {
-      console.log(res);
+      // console.log(res);
       firestore.getProductById(id).then((res) => {
         setProdus(res);
       });
@@ -116,13 +120,22 @@ function ProductPage({ addit }) {
   };
 
   const delete_rev = async (rev) => {
-    console.log(rev);
-    await firestore.deleteRev({ rev, id, uid: user.uid }).then((res) => {
+    // console.log(rev);
+    await firestore.deleteRev({ rev, id }).then((res) => {
       firestore.getProductById(id).then((res) => {
         setProdus(res);
       });
     });
   };
+
+  const [also, setAlso] = useState([]);
+  const getAlso = async (cat) => {
+    setAlso(
+      await firestore.readDocuments("products", ["categories", "==", cat])
+    );
+    // console.log(also);
+  };
+
   return (
     <>
       <div className="container-fluid">
@@ -156,7 +169,7 @@ function ProductPage({ addit }) {
               data-ride="carousel"
             >
               <div className="carousel-inner bg-light">
-                {produs && produs.images ? (
+                {produs && produs.images.length !== 0 ? (
                   produs.images.map((img, index) => {
                     return (
                       <div
@@ -210,16 +223,21 @@ function ProductPage({ addit }) {
                       return (
                         <>
                           {index >= produs.rating ? (
+                            //gol
                             <i className="far fa-star" key={index}></i>
-                          ) : (
+                          ) : index + 1 <= Math.floor(produs.rating) ? (
+                            //plin
                             <i className="fas fa-star" key={index}></i>
+                          ) : (
+                            //jumate
+                            <i className="fas fa-star-half-alt" key={index}></i>
                           )}
                         </>
                       );
                     })}
                 </div>
                 <small className="pt-1">
-                  ({produs && Math.round(produs.rating * 100) / 100})
+                  ({produs && Placeholder.roundit(produs.rating)})
                 </small>
               </div>
               <h3 className="font-weight-semi-bold mb-4">
@@ -438,9 +456,7 @@ function ProductPage({ addit }) {
                   data-toggle="tab"
                   href="#tab-pane-3"
                 >
-                  Reviews ({produs &&
-                        produs.reviews &&
-                        produs.reviews.length})
+                  Reviews ({produs && produs.reviews && produs.reviews.length})
                 </a>
               </div>
               <div className="tab-content">
@@ -499,8 +515,7 @@ function ProductPage({ addit }) {
                         ({produs && produs.reviews && produs.reviews.length})
                         reviews for {produs && produs.nume}
                       </h4>
-                      {produs &&
-                        produs.reviews &&
+                      {produs && produs.reviews ? (
                         produs.reviews.map((rev, index) => {
                           return (
                             <>
@@ -509,11 +524,11 @@ function ProductPage({ addit }) {
                                   src={rev.user.img}
                                   alt="Image"
                                   className="img-fluid mr-3 mt-1"
-                                  style={{ width: 45 }}
+                                  style={{ width: 45, borderRadius: "90%" }}
                                 />
                                 <div className="media-body">
                                   <h6>
-                                    {rev.nume}
+                                    {rev.user.nume}
                                     <small>
                                       {" "}
                                       - <i>{rev.date}</i>
@@ -555,7 +570,10 @@ function ProductPage({ addit }) {
                               </div>
                             </>
                           );
-                        })}
+                        })
+                      ) : (
+                        <h5>Nu sunt reviews pentru acest produs</h5>
+                      )}
                     </div>
                     {user ? (
                       <>
@@ -619,30 +637,7 @@ function ProductPage({ addit }) {
                                 className="form-control"
                               ></textarea>
                             </div>
-                            <div className="form-group">
-                              <label htmlFor="name">Your Name *</label>
-                              <input
-                                required
-                                onChange={(e) =>
-                                  handlerev("nume", e.target.value)
-                                }
-                                type="text"
-                                className="form-control"
-                                id="name"
-                              />
-                            </div>
-                            <div className="form-group">
-                              <label htmlFor="email">Your Email *</label>
-                              <input
-                                type="email"
-                                required
-                                onChange={(e) =>
-                                  handlerev("email", e.target.value)
-                                }
-                                className="form-control"
-                                id="email"
-                              />
-                            </div>
+
                             <div className="form-group mb-0">
                               <button
                                 className="btn btn-primary px-3"
@@ -656,7 +651,7 @@ function ProductPage({ addit }) {
                       </>
                     ) : (
                       <>
-                        <h4>Logheaza te pentru a alasa un review</h4>
+                        <h4>Logheaza te pentru a lasa un review</h4>
                       </>
                     )}
                   </div>
@@ -672,218 +667,40 @@ function ProductPage({ addit }) {
           <span className="bg-secondary pr-3">You May Also Like</span>
         </h2>
         <div className="row px-xl-5">
-          <div className="col">
-            <div className="owl-carousel related-carousel">
-              <div className="product-item bg-light">
-                <div className="product-img position-relative overflow-hidden">
-                  <img
-                    className="img-fluid w-100"
-                    src="img/product-1.jpg"
-                    alt=""
-                  />
-                  <div className="product-action">
-                    <a className="btn btn-outline-dark btn-square" href="">
-                      <i className="fa fa-shopping-cart"></i>
-                    </a>
-                    <a className="btn btn-outline-dark btn-square" href="">
-                      <i className="far fa-heart"></i>
-                    </a>
-                    <a className="btn btn-outline-dark btn-square" href="">
-                      <i className="fa fa-sync-alt"></i>
-                    </a>
-                    <a className="btn btn-outline-dark btn-square" href="">
-                      <i className="fa fa-search"></i>
-                    </a>
-                  </div>
-                </div>
-                <div className="text-center py-4">
-                  <a className="h6 text-decoration-none text-truncate" href="">
-                    Product Name Goes Here
-                  </a>
-                  <div className="d-flex align-items-center justify-content-center mt-2">
-                    <h5>$123.00</h5>
-                    <h6 className="text-muted ml-2">
-                      <del>$123.00</del>
-                    </h6>
-                  </div>
-                  <div className="d-flex align-items-center justify-content-center mb-1">
-                    <small className="fa fa-star text-primary mr-1"></small>
-                    <small className="fa fa-star text-primary mr-1"></small>
-                    <small className="fa fa-star text-primary mr-1"></small>
-                    <small className="fa fa-star text-primary mr-1"></small>
-                    <small className="fa fa-star text-primary mr-1"></small>
-                    <small>(99)</small>
-                  </div>
-                </div>
-              </div>
-              <div className="product-item bg-light">
-                <div className="product-img position-relative overflow-hidden">
-                  <img
-                    className="img-fluid w-100"
-                    src="img/product-2.jpg"
-                    alt=""
-                  />
-                  <div className="product-action">
-                    <a className="btn btn-outline-dark btn-square" href="">
-                      <i className="fa fa-shopping-cart"></i>
-                    </a>
-                    <a className="btn btn-outline-dark btn-square" href="">
-                      <i className="far fa-heart"></i>
-                    </a>
-                    <a className="btn btn-outline-dark btn-square" href="">
-                      <i className="fa fa-sync-alt"></i>
-                    </a>
-                    <a className="btn btn-outline-dark btn-square" href="">
-                      <i className="fa fa-search"></i>
-                    </a>
-                  </div>
-                </div>
-                <div className="text-center py-4">
-                  <a className="h6 text-decoration-none text-truncate" href="">
-                    Product Name Goes Here
-                  </a>
-                  <div className="d-flex align-items-center justify-content-center mt-2">
-                    <h5>$123.00</h5>
-                    <h6 className="text-muted ml-2">
-                      <del>$123.00</del>
-                    </h6>
-                  </div>
-                  <div className="d-flex align-items-center justify-content-center mb-1">
-                    <small className="fa fa-star text-primary mr-1"></small>
-                    <small className="fa fa-star text-primary mr-1"></small>
-                    <small className="fa fa-star text-primary mr-1"></small>
-                    <small className="fa fa-star text-primary mr-1"></small>
-                    <small className="fa fa-star text-primary mr-1"></small>
-                    <small>(99)</small>
-                  </div>
-                </div>
-              </div>
-              <div className="product-item bg-light">
-                <div className="product-img position-relative overflow-hidden">
-                  <img
-                    className="img-fluid w-100"
-                    src="img/product-3.jpg"
-                    alt=""
-                  />
-                  <div className="product-action">
-                    <a className="btn btn-outline-dark btn-square" href="">
-                      <i className="fa fa-shopping-cart"></i>
-                    </a>
-                    <a className="btn btn-outline-dark btn-square" href="">
-                      <i className="far fa-heart"></i>
-                    </a>
-                    <a className="btn btn-outline-dark btn-square" href="">
-                      <i className="fa fa-sync-alt"></i>
-                    </a>
-                    <a className="btn btn-outline-dark btn-square" href="">
-                      <i className="fa fa-search"></i>
-                    </a>
-                  </div>
-                </div>
-                <div className="text-center py-4">
-                  <a className="h6 text-decoration-none text-truncate" href="">
-                    Product Name Goes Here
-                  </a>
-                  <div className="d-flex align-items-center justify-content-center mt-2">
-                    <h5>$123.00</h5>
-                    <h6 className="text-muted ml-2">
-                      <del>$123.00</del>
-                    </h6>
-                  </div>
-                  <div className="d-flex align-items-center justify-content-center mb-1">
-                    <small className="fa fa-star text-primary mr-1"></small>
-                    <small className="fa fa-star text-primary mr-1"></small>
-                    <small className="fa fa-star text-primary mr-1"></small>
-                    <small className="fa fa-star text-primary mr-1"></small>
-                    <small className="fa fa-star text-primary mr-1"></small>
-                    <small>(99)</small>
-                  </div>
-                </div>
-              </div>
-              <div className="product-item bg-light">
-                <div className="product-img position-relative overflow-hidden">
-                  <img
-                    className="img-fluid w-100"
-                    src="img/product-4.jpg"
-                    alt=""
-                  />
-                  <div className="product-action">
-                    <a className="btn btn-outline-dark btn-square" href="">
-                      <i className="fa fa-shopping-cart"></i>
-                    </a>
-                    <a className="btn btn-outline-dark btn-square" href="">
-                      <i className="far fa-heart"></i>
-                    </a>
-                    <a className="btn btn-outline-dark btn-square" href="">
-                      <i className="fa fa-sync-alt"></i>
-                    </a>
-                    <a className="btn btn-outline-dark btn-square" href="">
-                      <i className="fa fa-search"></i>
-                    </a>
-                  </div>
-                </div>
-                <div className="text-center py-4">
-                  <a className="h6 text-decoration-none text-truncate" href="">
-                    Product Name Goes Here
-                  </a>
-                  <div className="d-flex align-items-center justify-content-center mt-2">
-                    <h5>$123.00</h5>
-                    <h6 className="text-muted ml-2">
-                      <del>$123.00</del>
-                    </h6>
-                  </div>
-                  <div className="d-flex align-items-center justify-content-center mb-1">
-                    <small className="fa fa-star text-primary mr-1"></small>
-                    <small className="fa fa-star text-primary mr-1"></small>
-                    <small className="fa fa-star text-primary mr-1"></small>
-                    <small className="fa fa-star text-primary mr-1"></small>
-                    <small className="fa fa-star text-primary mr-1"></small>
-                    <small>(99)</small>
-                  </div>
-                </div>
-              </div>
-              <div className="product-item bg-light">
-                <div className="product-img position-relative overflow-hidden">
-                  <img
-                    className="img-fluid w-100"
-                    src="img/product-5.jpg"
-                    alt=""
-                  />
-                  <div className="product-action">
-                    <a className="btn btn-outline-dark btn-square" href="">
-                      <i className="fa fa-shopping-cart"></i>
-                    </a>
-                    <a className="btn btn-outline-dark btn-square" href="">
-                      <i className="far fa-heart"></i>
-                    </a>
-                    <a className="btn btn-outline-dark btn-square" href="">
-                      <i className="fa fa-sync-alt"></i>
-                    </a>
-                    <a className="btn btn-outline-dark btn-square" href="">
-                      <i className="fa fa-search"></i>
-                    </a>
-                  </div>
-                </div>
-                <div className="text-center py-4">
-                  <a className="h6 text-decoration-none text-truncate" href="">
-                    Product Name Goes Here
-                  </a>
-                  <div className="d-flex align-items-center justify-content-center mt-2">
-                    <h5>$123.00</h5>
-                    <h6 className="text-muted ml-2">
-                      <del>$123.00</del>
-                    </h6>
-                  </div>
-                  <div className="d-flex align-items-center justify-content-center mb-1">
-                    <small className="fa fa-star text-primary mr-1"></small>
-                    <small className="fa fa-star text-primary mr-1"></small>
-                    <small className="fa fa-star text-primary mr-1"></small>
-                    <small className="fa fa-star text-primary mr-1"></small>
-                    <small className="fa fa-star text-primary mr-1"></small>
-                    <small>(99)</small>
-                  </div>
-                </div>
-              </div>
+          <div className="col-lg-9 col-md-8">
+            <div className="row pb-3 products">
+              {also && also.length !== 1 ? (
+                also.map((prod, index) => {
+                  if (prod.id !== id)
+                    return (
+                      <Product
+                        key={prod.id}
+                        id={prod.id}
+                        addit={addit}
+                        img={prod.images ? prod.images[0] : ""}
+                        link={`/prod/${prod.id}`}
+                        name={Text.returnSizedText(prod.nume)}
+                        price={prod.pret}
+                        oldPrice={prod.old_pret}
+                        rating={prod.rating}
+                      />
+                    );
+                })
+              ) : (
+                  <h4>Nu mai sunt alte produse din aceasta categorie</h4>
+                // <div
+                //   className="carousel-item active"
+                //   key={Math.random()}
+                //   style={{
+                //     height: 370,
+                //     display: "flex",
+                //     justifyContent: "center",
+                //     alignItems: "center",
+                //   }}
+                // >
+                //   <span className="loader"></span>
+                // </div>
+              )}
             </div>
           </div>
         </div>

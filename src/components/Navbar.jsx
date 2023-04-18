@@ -2,12 +2,9 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Firestore from "../js/Firestore";
 import firebase from "firebase/compat/app";
-import "firebase/database";
-import "firebase/compat/database";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { getAuth } from "@firebase/auth";
 import useWindowSize from "../util/WindowSize";
-import { doc, onSnapshot } from "firebase/firestore";
 
 const firestore = new Firestore();
 
@@ -33,6 +30,7 @@ function Navbar({ cos }) {
   const getCategories = async () => {
     firestore.readDocuments("categories").then((res) => {
       setCategories(res);
+      // console.log(res);
     });
   };
 
@@ -44,7 +42,7 @@ function Navbar({ cos }) {
   //     await firestore
   //       .readDocuments("cos", ["user_id", "==", user.uid])
   //       .then((res) => {
-  //         // console.log(res);
+  //         // // console.log(res);
   //         for (let i = 0; i < res.length; i++) {
   //           cant += res[i].cantitate;
   //         }
@@ -53,39 +51,10 @@ function Navbar({ cos }) {
   //   } else {
   //     setcos(0);
   //   }
-  //   console.log("cant ", cant);
+  //   // console.log("cant ", cant);
   // };
 
   useEffect(() => {
-    // firebase
-    //   .database()
-    //   .ref("/cos")
-    //   .on("value", async (snapshot) => {
-    //     snapshot.forEach((snap) => {
-    //       console.log(snap);
-    //     });
-
-    //     console.log(snapshot);
-
-    //     console.log("ce plm");
-
-    //     let cant = 0;
-
-    //     if (user) {
-    //       await firestore
-    //         .readDocuments("cos", ["user_id", "==", user.uid])
-    //         .then((res) => {
-    //           // console.log(res);
-    //           for (let i = 0; i < res.length; i++) {
-    //             cant += res[i].cantitate;
-    //           }
-    //           setcos(cant);
-    //         });
-    //     } else {
-    //       setcos(0);
-    //     }
-    //   });
-
     getCategories();
   }, []);
 
@@ -100,7 +69,7 @@ function Navbar({ cos }) {
   const logout = async () => {
     await firestore.logout();
   };
-  // console.log(user);
+  // // console.log(user);
 
   const [search, setSearch] = useState("");
   const searchfct = () => {};
@@ -109,14 +78,14 @@ function Navbar({ cos }) {
       <div className="container-fluid">
         <div className="row align-items-center bg-light py-3 px-xl-5 ">
           <div className="col-lg-4">
-            <a href="" className="text-decoration-none">
+            <Link to="/" className="text-decoration-none">
               <span className="h1 text-uppercase text-primary bg-dark px-2">
                 NAVI
               </span>
               <span className="h1 text-uppercase text-dark bg-primary px-2 ml-n1">
                 SIL
               </span>
-            </a>
+            </Link>
           </div>
           <div className="col-lg-4 col-6 text-left">
             <form action="">
@@ -189,14 +158,14 @@ function Navbar({ cos }) {
         <div className="row px-xl-5">
           <div className="col-lg-9">
             <nav className="navbar navbar-expand-lg bg-dark navbar-dark py-3 py-lg-0 px-0">
-              <a href="" className="text-decoration-none d-block d-lg-none">
+              <Link to="/" className="text-decoration-none d-block d-lg-none">
                 <span className="h1 text-uppercase text-dark bg-light px-2">
                   NAVI
                 </span>
                 <span className="h1 text-uppercase text-light bg-primary px-2 ml-n1">
                   SIL
                 </span>
-              </a>
+              </Link>
               <button
                 type="button"
                 className="navbar-toggler"
@@ -216,9 +185,12 @@ function Navbar({ cos }) {
                   <Link to="/contact" className="nav-item nav-link">
                     Contact
                   </Link>
-                  <Link to="/checkout" className="nav-item nav-link">
-                    Checkout
-                  </Link>
+
+                  {user && (
+                    <Link to="/checkout" className="nav-item nav-link">
+                      Checkout
+                    </Link>
+                  )}
                 </div>
                 <div className="navbar-nav ml-auto py-0 d-none d-lg-block">
                   <Link to="/cart" className="btn px-0 ml-3">

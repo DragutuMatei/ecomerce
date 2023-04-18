@@ -3,12 +3,12 @@ import Firestore from "../js/Firestore";
 import { getAuth } from "@firebase/auth";
 import { useAuthState } from "react-firebase-hooks/auth";
 import Text from "../util/Text";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 
 const firestore = new Firestore();
 const auth = getAuth();
 
-function Checkout({addit}) {
+function Checkout({ addit }) {
   let ship = 10;
   const [user, loading, error] = useAuthState(auth);
   const [products, setP] = useState([]);
@@ -25,7 +25,7 @@ function Checkout({addit}) {
     await firestore.signInWithGoogle();
   };
   const ok = async () => {
-    console.log(user);
+    // console.log(user);
     let resp = await firestore.getProductByUser(user);
     setP(resp.cant);
     setTotal(resp.total);
@@ -36,6 +36,7 @@ function Checkout({addit}) {
 
   return (
     <>
+      {!user && <Navigate to="/" />}
       <div className="container-fluid">
         <div className="row px-xl-5">
           <div className="col-12">
@@ -64,7 +65,7 @@ function Checkout({addit}) {
                   >
                     <Link to={`/prod/${prod.id}`}>
                       <p>{prod.nume}</p>
-                    </Link> 
+                    </Link>
                     <p style={{ margin: 0, textAlign: "end" }}>
                       {prod.cant.toLocaleString("en-US")} x $
                       {prod.pret.toLocaleString("en-US")}
@@ -147,7 +148,7 @@ function Checkout({addit}) {
                     placeholder="123 Street"
                   />
                 </div>
-                 
+
                 <div className="col-md-6 form-group">
                   <label>City</label>
                   <input
@@ -237,7 +238,7 @@ function Checkout({addit}) {
                       placeholder="123 Street"
                     />
                   </div>
-               
+
                   <div className="col-md-6 form-group">
                     <label>City</label>
                     <input

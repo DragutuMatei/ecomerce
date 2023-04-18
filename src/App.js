@@ -33,7 +33,7 @@ function App() {
 
   const getCos = async () => {
     setCos(await firestore.getCos(user));
-    console.log(await firestore.getCos(user));
+    // console.log(await firestore.getCos(user));
   };
 
   useEffect(() => {

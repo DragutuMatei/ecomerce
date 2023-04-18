@@ -2,9 +2,10 @@ import React from "react";
 import { Link } from "react-router-dom";
 import Firestore from "../js/Firestore";
 import { useAuthState } from "react-firebase-hooks/auth";
+import Placeholder from "../util/Placeholder";
 
 const firestore = new Firestore();
-function Product({ img, link, name, price, oldPrice, review, id, addit }) {
+function Product({ img, link, name, price, oldPrice, id, addit, rating }) {
   const [user, loading, error] = useAuthState(firestore.getuser());
 
   const addit_prod = async (cant) => {
@@ -21,18 +22,18 @@ async function getProduct(productId) {
     if (productSnap.exists()) {
       return productSnap.data();
     } else {
-      console.log("No such document exists!");
+      // console.log("No such document exists!");
       return null;
     }
   } catch (error) {
-    console.log("Error getting document:", error);
+    // console.log("Error getting document:", error);
     return null;
   }
 }
    * 
    * 
    */
-  // console.log(user);
+  // // console.log(user);
   return (
     <div className="col-lg-3 col-md-4 col-sm-6 pb-1">
       <div className="product-item bg-light mb-4">
@@ -55,15 +56,19 @@ async function getProduct(productId) {
               <a
                 className="btn btn-outline-dark btn-square"
                 title="Adaugă în coș"
-                onClick={()=>addit_prod(1)}
+                onClick={() => addit_prod(1)}
               >
                 <i className="fa fa-shopping-cart"></i>
               </a>
             )}
 
-            <Link className="btn btn-outline-dark btn-square" to={link}>
+            <a
+              className="btn btn-outline-dark btn-square"
+              href={link}
+              params={{ testvalue: "hello" }}
+            >
               <i className="fa fa-search"></i>
-            </Link>
+            </a>
           </div>
         </div>
         <div className="text-center py-4">
@@ -79,12 +84,28 @@ async function getProduct(productId) {
             )}
           </div>
           <div className="d-flex align-items-center justify-content-center mb-1">
+            {[...Array(5)].map((e, index) => {
+               return (
+                <>
+                  {index >= rating ? (
+                    //gol
+                    <i className="far fa-star" key={index}></i>
+                  ) : index + 1 <= Math.floor(rating) ? (
+                    //plin
+                    <i className="fas fa-star" key={index}></i>
+                  ) : (
+                    //jumate
+                    <i className="fas fa-star-half-alt" key={index}></i>
+                  )}
+                </>
+              );
+            })}
+            {/* <small className="fa fa-star text-primary mr-1"></small>
             <small className="fa fa-star text-primary mr-1"></small>
             <small className="fa fa-star text-primary mr-1"></small>
             <small className="fa fa-star text-primary mr-1"></small>
-            <small className="fa fa-star text-primary mr-1"></small>
-            <small className="fa fa-star text-primary mr-1"></small>
-            <small>({review})</small>
+            <small className="fa fa-star text-primary mr-1"></small> */}
+            <small>({Placeholder.roundit(rating)})</small>
           </div>
         </div>
       </div>

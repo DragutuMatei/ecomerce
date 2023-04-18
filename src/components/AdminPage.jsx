@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Firestore from "../js/Firestore";
-import firebase from "firebase/compat/app";
-import "firebase/storage";
+// import firebase from "firebase/compat/app";
+// import "firebase/storage";
 
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import Placeholder from "../util/Placeholder";
@@ -91,8 +91,8 @@ function AdminPage() {
     // setNewItem((old) => ({
     // }));
 
-    console.log(downloadUrls, idk);
-    // console.log(newItem);
+    // console.log(downloadUrls, idk);
+    // // console.log(newItem);
 
     await firestore.addItem("products", idk);
     getProducts();
@@ -100,7 +100,7 @@ function AdminPage() {
   };
 
   const see = () => {
-    console.log(newItem);
+    // console.log(newItem);
   };
 
   const [updateItem, setUpdateItem] = useState({
@@ -132,7 +132,7 @@ function AdminPage() {
   };
   const updateFCT = async () => {
     let arr = updateItem.images.filter((ok) => typeof ok !== "string");
-    console.log(arr);
+    // console.log(arr);
     updateItem.images.length -= arr.length;
 
     const storage = getStorage();
@@ -149,13 +149,13 @@ function AdminPage() {
         console.error(error);
       }
     }
-    console.log(downloadUrls);
+    // console.log(downloadUrls);
     let idk = {
       ...updateItem,
       images: updateItem.images.concat(downloadUrls),
     };
 
-    console.log(idk);
+    // console.log(idk);
 
     await firestore.updateDocument("products", idk.id, idk).then((res) => {
       getProducts();
@@ -164,6 +164,7 @@ function AdminPage() {
   };
 
   const deletef = async (id) => {
+    await firestore.delete_all_from_cart(id);
     await firestore.deleteDocument("products", id).then((res) => {
       getProducts();
       alert("Produs sters!");
@@ -171,7 +172,7 @@ function AdminPage() {
   };
 
   const handleDelete = (indexToDelete) => {
-    console.log(indexToDelete);
+    // console.log(indexToDelete);
     const updatedArray = updateItem.images.filter(
       (_, index) => index !== indexToDelete
     );
@@ -181,12 +182,12 @@ function AdminPage() {
     const updatedArray = [...updateItem.images, ...newElement];
     // const updatedArray = [...updateItem.images, newElement];
     setUpdateItem({ ...updateItem, images: updatedArray });
-    console.log(updateItem.images);
+    // console.log(updateItem.images);
   };
 
   const [file, setFile] = useState([]);
   function handleChange(e) {
-    console.log(e);
+    // console.log(e);
     e.map((file) => {
       setFile((old) => [...old, URL.createObjectURL(file)]);
     });
@@ -471,7 +472,7 @@ function AdminPage() {
               <button onClick={updateFCT}>update</button>
               <button
                 onClick={() => {
-                  // console.log(updateItem);
+                  // // console.log(updateItem);
                   setUpdateState(false);
                 }}
               >

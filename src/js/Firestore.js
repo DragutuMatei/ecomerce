@@ -49,7 +49,7 @@ export default class Firestore {
         return true;
       })
       .catch((e) => {
-        console.log(e);
+        // console.log(e);
         return false;
       });
   }
@@ -92,7 +92,7 @@ export default class Firestore {
       }
       // cant.forEach(async prod => {
       // })
-      console.log("2) ", cant);
+      // console.log("2) ", cant);
     }
     return { cant, total };
   }
@@ -104,7 +104,7 @@ export default class Firestore {
         cantitate: cant,
         user_id: user.uid,
       }).then((res) => {
-        console.log(res);
+        // console.log(res);
         if (res === "adaug") alert("Adaugat cu succes in cos!");
         else if (res === "update ok") alert("Update cantitate");
         else alert("eroare");
@@ -158,7 +158,7 @@ export default class Firestore {
     // Use the addDoc() method to add a new document to the products collection
     return await addDoc(productsRef, product)
       .then((docRef) => {
-        console.log("Document written with ID: ", docRef.id);
+        // console.log("Document written with ID: ", docRef.id);
         return docRef.id;
       })
       .catch((error) => {
@@ -180,7 +180,7 @@ export default class Firestore {
     if (querySnapshot.size !== 1) {
       await addDoc(productsRef, product)
         .then((docRef) => {
-          console.log("Document written with ID: ", docRef.id);
+          // console.log("Document written with ID: ", docRef.id);
           return "adaug";
         })
         .catch((error) => {
@@ -197,10 +197,10 @@ export default class Firestore {
       await updateDoc(productRef, {
         cantitate: productDoc.get("cantitate") + product.cantitate,
       });
-      console.log("Document successfully updated!");
+      // console.log("Document successfully updated!");
       return "update ok";
     } catch (error) {
-      console.log("Error updating document:", error);
+      // console.log("Error updating document:", error);
       return false;
     }
   }
@@ -228,7 +228,6 @@ export default class Firestore {
     if (condition == undefined) {
       q = query(collection(this.db, collectionName));
     } else {
-      // console.log("asd");
       q = query(
         collection(this.db, collectionName),
         where(condition[0], condition[1], condition[2])
@@ -246,7 +245,7 @@ export default class Firestore {
   async getProductById(productId) {
     const docRef = doc(this.db, "products", productId);
     const docSnap = await getDoc(docRef);
-    // console.log(docSnap.data().images);
+    // // console.log(docSnap.data().images);
 
     if (docSnap.exists()) {
       return { id: docSnap.id, ...docSnap.data() };
@@ -254,7 +253,7 @@ export default class Firestore {
   }
   // Update a document in a collection
   async updateDocument(collectionName, documentId, data) {
-    console.log(collectionName, documentId, data);
+    // console.log(collectionName, documentId, data);
     const ref = doc(this.db, collectionName, documentId);
 
     // Set the "capital" field of the city 'DC'
@@ -266,44 +265,61 @@ export default class Firestore {
     let reviews = [...prod.reviews, { ...rev }];
     prod.reviews = reviews;
     let rating = prod.rating;
+    let newRating = 0;
     if (rating == 0) {
-      rating = rev.rating;
+      newRating = rev.rating;
     } else {
-      rating = (rating + rev.rating) / 2;
+      for (let i = 0; i < reviews.length; i++) {
+        newRating += reviews[i].rating;
+      }
+      newRating /= reviews.length;
     }
-    prod.rating = rating;
+    prod.rating = newRating;
 
     return await this.updateDocument("products", id, prod);
   }
 
   async deleteRev(revi) {
-    const { date, email, nume, rating, review, user } = revi.rev;
+    const { date, rating, review, user } = revi.rev;
     const id = revi.id;
 
     const prod = await this.getProductById(id);
     let { reviews } = prod;
     let index = 0;
+    let newRating = 0;
     prod.reviews.forEach((rev, i, object) => {
       if (
         rev.date == date &&
-        rev.email == email &&
-        rev.nume == nume &&
         rev.rating == rating &&
         rev.review == review &&
-        rev.user.id == revi.uid
+        rev.user.id == user.id &&
+        rev.user.email == user.email &&
+        rev.user.nume == user.nume
       ) {
         index = i;
+        for (let i = 0; i < reviews.length; i++) {
+          if (i != index) {
+            newRating += reviews[i].rating;
+            // console.log(reviews[i].rating);
+          }
+        }
+        newRating /= reviews.length - 1;
       }
     });
     reviews.splice(index, 1);
-
+    prod.rating = newRating;
     prod.reviews = reviews;
-
     return await this.updateDocument("products", id, prod);
   }
 
   // Delete a document from a collection
   async deleteDocument(collectionName, documentId) {
     await deleteDoc(doc(this.db, collectionName, documentId));
+  }
+  async delete_all_from_cart(id) {
+    const carts = await this.readDocuments("cos", ["id_produs", "==", id]);
+    for (const cart of carts) {
+      await this.deleteDocument("cos", cart.id);
+    }
   }
 }
