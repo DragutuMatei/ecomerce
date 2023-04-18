@@ -37,6 +37,181 @@
     "Liberation Mono", "Courier New", monospace;
 }
 
+/* mielenesascriualtundeva */
+.addSection{
+  /* background-color: #007bff; */
+  display: flex;
+  justify-content: space-evenly;
+
+  color: #000;
+}
+
+.addSection .left, .addSection .right{
+  font-family: var(--font-family-sans-serif);
+  font-weight: 500;
+
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.addSection .numeProdus .addTitle{
+  margin: 10px 0px;
+}
+
+.addSection .numeProdus input{
+  height: 50px;
+  width: 100%;
+
+  border: 2px solid black;
+  border-radius: 8px;
+
+  padding: 5px 10px;
+}
+
+.addSection .categorieProdus{
+  display: flex;
+  justify-content: space-between;
+}
+
+.addSection .categorii{
+  border: 2px solid #8e8e8e;
+  border-radius: 8px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.addSection .categorieProdus option{
+  width: 100%;
+}
+
+.addSection .addPret{
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.addSection .addPret input{
+  border: 2px solid black;
+  border-radius: 8px;
+  height: 45px;
+  padding: 5px 20px;
+}
+
+.addSection .descriereProdus{
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.addSection .descriereProdus textarea{
+  height: 120px;
+  width: 460px;
+
+  border: 2px solid black;
+  border-radius: 8px;
+
+  padding: 10px 20px;
+}
+
+.addSection .imagineProdus{
+  height: 95px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+}
+
+.addSection .imagineProdus input{
+  width: 100%;
+  height: 50px;
+
+  border: 2px dashed black;
+  border-radius: 8px;
+
+  padding: 10px 20px;
+}
+
+.addSection .informatieProdus textarea
+{
+  height: 124px;
+  width: 460px;
+
+  border: 2px solid black;
+  border-radius: 8px;
+
+  padding: 10px 20px;
+}
+
+.addSection .cantitateProdus{
+  display: flex;
+  justify-content: space-between;
+}
+
+.addSection .cantitateProdus input{
+  width: 200px;
+  height: 50px;
+
+  border: 2px dashed black;
+  border-radius: 8px;
+
+  padding: 5px 12px;
+}
+
+.addSection .actiuniProdus{
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+
+  margin: 30px 0px;
+}
+
+.addSection .button-6 {
+  align-items: center;
+  background-color: #FFFFFF;
+  border: 1px solid rgba(0, 0, 0, 0.773);
+  border-radius: .25rem;
+  box-shadow: rgba(0, 0, 0, 0.02) 0 1px 3px 0;
+  box-sizing: border-box;
+  color: rgba(0, 0, 0, 0.85);
+  cursor: pointer;
+  display: inline-flex;
+  font-family: system-ui,-apple-system,system-ui,"Helvetica Neue",Helvetica,Arial,sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  justify-content: center;
+  line-height: 1.25;
+  margin: 0;
+  min-height: 3rem;
+  padding: calc(.875rem - 1px) calc(1.5rem - 1px);
+  position: relative;
+  text-decoration: none;
+  transition: all 250ms;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  vertical-align: baseline;
+  width: auto;
+}
+
+.addSection .button-6:hover,
+.addSection .button-6:focus {
+  border-color: rgba(0, 0, 0, 0.15);
+  box-shadow: rgba(0, 0, 0, 0.1) 0 4px 12px;
+  color: rgba(0, 0, 0, 0.65);
+}
+
+.addSection .button-6:hover {
+  transform: translateY(-1px);
+}
+
+.addSection .button-6:active {
+  background-color: #F0F0F1;
+  border-color: rgba(0, 0, 0, 0.15);
+  box-shadow: rgba(0, 0, 0, 0.06) 0 2px 4px;
+  color: rgba(0, 0, 0, 0.65);
+  transform: translateY(0);
+}
+
 *,
 *::before,
 *::after {

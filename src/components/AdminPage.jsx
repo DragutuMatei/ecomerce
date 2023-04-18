@@ -209,68 +209,114 @@ function AdminPage() {
     <>
       <div style={{ margin: "0 30px" }}>
         <section className="addSection">
-          <textarea
-            placeholder="nume"
-            onChange={(e) => modifield("nume", e.target.value)}
-            cols="30"
-            rows="10"
-          ></textarea>
-          <textarea
-            name=""
-            id=""
-            onChange={(e) => modifield("descriere_scurta", e.target.value)}
-            cols="30"
-            rows="10"
-            placeholder="descriere_scurta"
-          ></textarea>
-          <textarea
-            name=""
-            id=""
-            onChange={(e) => modifield("descriere_lunga", e.target.value)}
-            cols="30"
-            rows="10"
-            placeholder="descriere_lunga"
-          ></textarea>
-          <textarea
-            onChange={(e) => modifield("info", e.target.value)}
-            name=""
-            id=""
-            cols="30"
-            rows="10"
-            placeholder="info"
-          ></textarea>
-          <select onChange={(e) => modifield("categories", e.target.value)}>
-            <option>Alege o caterogie</option>
-            {categories &&
-              categories.map((cat) => (
-                <option key={cat.categorie} value={cat.categorie}>
-                  {cat.categorie}
-                </option>
-              ))}
-          </select>
-          <input
-            type="number"
-            onChange={(e) => modifield("pret", parseFloat(e.target.value))}
-            placeholder="pret"
-          />
-          <input
-            type="number"
-            onChange={(e) => modifield("old_pret", parseFloat(e.target.value))}
-            placeholder="old_pret"
-          />
-          <input
-            type="date"
-            onChange={(e) => modifield("date", e.target.value)}
-            placeholder="date"
-          />
-          <input
-            type="number"
-            onChange={(e) => modifield("cantitate", parseFloat(e.target.value))}
-            placeholder="cantitate"
-          />
-          <input type="file" multiple onChange={handleFileInputChange} />
-          <button onClick={handleSubmit}>submit</button>
-          <button onClick={see}>see item</button>
+          <div className="left">
+            <div className="numeProdus">
+              <div className="addTitle">Nume Produs</div>
+              <input
+                placeholder="Nume Produs"
+                onChange={(e) => modifield("nume", e.target.value)}
+              // cols="30"
+              // rows="10"
+              ></input>
+            </div>
+            <div className="categorieProdus">
+              <div>
+
+                <div className="addCategorie">Categorie</div>
+                <select onChange={(e) => modifield("categories", e.target.value)}>
+                  <option>Alege o caterogie</option>
+                  {categories &&
+                    categories.map((cat) => (
+                      <option key={cat.categorie} value={cat.categorie}>
+                        {cat.categorie}
+                      </option>
+                    ))}
+                </select>
+              </div>
+              {/* <div className="categorii">
+                {
+                  categories && categories.map((cat)=>{
+                    return (<div className="categ" { ...newItem[categories] === cat.categorie ? 'id="cetegSelected' : null} key={Math.random()} onClick={(e)=>{modifield("categories", e.target.value)}}>{cat.categorie}</div>)
+                  })
+                }
+              </div> */}
+              <div className="addPret">
+                <div>
+                  <div>Pret</div>
+                  <input
+                    type="number"
+                    onChange={(e) => modifield("pret", parseFloat(e.target.value))}
+                    placeholder="Pret de vanzare"
+                  />
+                </div>
+                <div>
+                  <div>Pret anterior</div>
+                  <input
+                    type="number"
+                    onChange={(e) => modifield("old_pret", parseFloat(e.target.value))}
+                    placeholder="Pret anterior"
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="descriereProdus">
+              <textarea
+                name=""
+                id=""
+                onChange={(e) => modifield("descriere_scurta", e.target.value)}
+                cols="30"
+                rows="10"
+                placeholder="Descriere scurta"
+              ></textarea>
+              <textarea
+                name=""
+                id=""
+                onChange={(e) => modifield("descriere_lunga", e.target.value)}
+                cols="30"
+                rows="10"
+                placeholder="Descriere lunga"
+              ></textarea>
+            </div>
+          </div>
+          <div className="right">
+            <div className="imagineProdus">
+              <div className="imagineTitle">Imagini Produs</div>
+              <input type="file" multiple onChange={handleFileInputChange} />
+            </div>
+            <div className="informatieProdus">
+              <div className="informatieTitle">Informatii Produs</div>
+              <textarea
+                onChange={(e) => modifield("info", e.target.value)}
+                name=""
+                id=""
+                cols="30"
+                rows="10"
+                placeholder="Informatii produs"
+              ></textarea>
+            </div>
+            <div className="cantitateProdus">
+              <div>
+                <div>Data Primire</div>
+                <input
+                  type="date"
+                  onChange={(e) => modifield("date", e.target.value)}
+                  placeholder="date"
+                />
+              </div>
+              <div>
+                <div>Cantitate Produs</div>
+                <input
+                  type="number"
+                  onChange={(e) => modifield("cantitate", parseFloat(e.target.value))}
+                  placeholder="cantitate"
+                />
+              </div>
+            </div>
+            <div className="actiuniProdus">
+              <button className="button-6" onClick={handleSubmit}>ADAUGA</button>
+              <button className="button-6" onClick={see}>VIZUALIZEAZA</button>
+            </div>
+          </div>
         </section>
         <br />
         <br />
